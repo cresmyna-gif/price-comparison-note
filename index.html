@@ -8,33 +8,36 @@
         :root { --color-A: #ff9800; --color-B: #2196f3; --bg: #f0f2f5; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 850px; }
-        
         .compare-area { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; border-top: 6px solid #ccc; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 320px; border-top: 6px solid #ccc; }
         .card.A { border-top-color: var(--color-A); }
         .card.B { border-top-color: var(--color-B); }
-        
-        /* 商品名稱輸入框樣式 */
         .name-input { width: 100%; font-size: 20px; font-weight: bold; text-align: center; border: none; border-bottom: 2px solid #eee; margin-bottom: 15px; padding: 5px; color: #333; }
         .name-input:focus { outline: none; border-bottom-color: #999; }
-        
         label { display: block; margin: 12px 0 6px; font-weight: bold; color: #666; font-size: 14px; }
-        .row { display: flex; gap: 8px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; }
-        select { width: 180px; }
         
+        .unit-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        input[type="number"] { flex: 1; min-width: 60px; }
+        select { width: 90px; cursor: pointer; }
+        .unit-info { font-size: 13px; color: #888; white-space: nowrap; }
+
         .unit-price-display { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 15px; text-align: center; border: 1px dashed #ddd; }
         .unit-price-display strong { font-size: 1.2em; color: #333; }
-
         .result-zone { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
         #winnerLabel { font-size: 22px; font-weight: bold; margin-bottom: 15px; display: block; }
         .save-bar { display: flex; gap: 10px; justify-content: center; }
         .btn-save { background: #4caf50; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
         .history-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         .btn-del { background: #ff5252; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .hist-detail { font-size: 14px; color: #444; line-height: 1.8; }
+        
+        /* 歷史紀錄獲勝者顏色 */
+        .win-A { color: var(--color-A); font-weight: bold; }
+        .win-B { color: var(--color-B); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -43,38 +46,42 @@
     <h1 style="text-align: center; color: #333;">🛒 比價換算筆記本 (2025版)</h1>
 
     <div class="compare-area">
-        <!-- 商品 A -->
         <div class="card A">
-            <input type="text" id="nameA" class="name-input" value="商品 A" oninput="update()">
+            <input type="text" id="nameA" class="name-input" value="商品 A">
             <label>價格 (元)</label>
-            <input type="number" id="pA" value="49" oninput="update()">
+            <input type="number" id="pA" value="49">
             <label>重量與單位</label>
-            <div class="row">
-                <input type="number" id="qA" value="1" oninput="update()">
-                <select id="uA" onchange="update()">
-                    <option value="600">台斤 (每台斤600g)</option>
-                    <option value="1000">公斤 (每公斤1000g)</option>
-                    <option value="1">公克 (每公克1g)</option>
+            <div class="unit-row">
+                <input type="number" id="qA" value="1">
+                <select id="uA">
+                    <option value="1000" data-desc="(每公斤1000g)">公斤</option>
+                    <option value="600" data-desc="(每台斤600g)" selected>台斤</option>
+                    <option value="37.5" data-desc="(每兩37.5g)">兩</option>
+                    <option value="453.6" data-desc="(每磅453.6g)">磅</option>
+                    <option value="1" data-desc="(每公克1g)">公克</option>
                 </select>
+                <span id="descA" class="unit-info">(每台斤600g)</span>
             </div>
             <div class="unit-price-display">
                 <strong id="kgA">--</strong><span> / 公斤</span>
             </div>
         </div>
 
-        <!-- 商品 B -->
         <div class="card B">
-            <input type="text" id="nameB" class="name-input" value="商品 B" oninput="update()">
+            <input type="text" id="nameB" class="name-input" value="商品 B">
             <label>價格 (元)</label>
-            <input type="number" id="pB" value="85" oninput="update()">
+            <input type="number" id="pB" value="85">
             <label>重量與單位</label>
-            <div class="row">
-                <input type="number" id="qB" value="1" oninput="update()">
-                <select id="uB" onchange="update()">
-                    <option value="1000" selected>公斤 (每公斤1000g)</option>
-                    <option value="600">台斤 (每台斤600g)</option>
-                    <option value="1">公克 (每公克1g)</option>
+            <div class="unit-row">
+                <input type="number" id="qB" value="1">
+                <select id="uB">
+                    <option value="1000" data-desc="(每公斤1000g)" selected>公斤</option>
+                    <option value="600" data-desc="(每台斤600g)">台斤</option>
+                    <option value="37.5" data-desc="(每兩37.5g)">兩</option>
+                    <option value="453.6" data-desc="(每磅453.6g)">磅</option>
+                    <option value="1" data-desc="(每公克1g)">公克</option>
                 </select>
+                <span id="descB" class="unit-info">(每公斤1000g)</span>
             </div>
             <div class="unit-price-display">
                 <strong id="kgB">--</strong><span> / 公斤</span>
@@ -85,13 +92,13 @@
     <div class="result-zone">
         <span id="winnerLabel">請輸入資料...</span>
         <div class="save-bar">
-            <input type="text" id="note" placeholder="本次比較備註 (如：2025番茄)">
+            <input type="text" id="note" placeholder="本次比較備註 (如：番茄)">
             <button class="btn-save" onclick="saveToHistory()">儲存此紀錄</button>
         </div>
     </div>
 
     <div class="history-card">
-        <h3 style="margin-top:0;">📋 歷史比價紀錄 (2025)</h3>
+        <h3 style="margin-top:0;">📋 歷史比價紀錄</h3>
         <table>
             <thead>
                 <tr>
@@ -108,14 +115,19 @@
 
 <script>
     function update() {
+        const selA = document.getElementById('uA');
+        document.getElementById('descA').innerText = selA.options[selA.selectedIndex].getAttribute('data-desc');
+        const selB = document.getElementById('uB');
+        document.getElementById('descB').innerText = selB.options[selB.selectedIndex].getAttribute('data-desc');
+
         const nameA = document.getElementById('nameA').value;
         const nameB = document.getElementById('nameB').value;
         const pA = parseFloat(document.getElementById('pA').value) || 0;
-        const qA = parseFloat(document.getElementById('qtyA')?.value || document.getElementById('qA').value) || 0;
-        const uA = parseFloat(document.getElementById('uA').value);
+        const qA = parseFloat(document.getElementById('qA').value) || 0;
+        const uA = parseFloat(selA.value);
         const pB = parseFloat(document.getElementById('pB').value) || 0;
-        const qB = parseFloat(document.getElementById('qtyB')?.value || document.getElementById('qB').value) || 0;
-        const uB = parseFloat(document.getElementById('uB').value);
+        const qB = parseFloat(document.getElementById('qB').value) || 0;
+        const uB = parseFloat(selB.value);
 
         const valA = qA > 0 ? (pA / (qA * uA)) * 1000 : Infinity;
         const valB = qB > 0 ? (pB / (qB * uB)) * 1000 : Infinity;
@@ -126,6 +138,7 @@
         const label = document.getElementById('winnerLabel');
         if (!isFinite(valA) || !isFinite(valB)) {
             label.innerText = "請輸入價格與重量";
+            label.style.color = "#888";
         } else if (valA < valB) {
             label.innerText = `🏆 ${nameA} 比較划算！`;
             label.style.color = "var(--color-A)";
@@ -142,6 +155,9 @@
         const note = document.getElementById('note').value || "無備註";
         const nameA = document.getElementById('nameA').value;
         const nameB = document.getElementById('nameB').value;
+        const selA = document.getElementById('uA');
+        const selB = document.getElementById('uB');
+
         const kgA = document.getElementById('kgA').innerText;
         const kgB = document.getElementById('kgB').innerText;
         const win = document.getElementById('winnerLabel').innerText;
@@ -149,45 +165,61 @@
 
         if (kgA === "--" || kgB === "--") return;
 
-        const record = { id: Date.now(), date, note, nameA, nameB, kgA, kgB, win };
-        let list = JSON.parse(localStorage.getItem('shopRecords2025') || "[]");
-        list.unshift(record);
-        localStorage.setItem('shopRecords2025', JSON.stringify(list));
+        // 判斷獲勝者是誰，存入標記
+        let winnerSide = "";
+        if (parseFloat(kgA) < parseFloat(kgB)) winnerSide = "A";
+        else if (parseFloat(kgB) < parseFloat(kgA)) winnerSide = "B";
+
+        const record = { 
+            id: Date.now(), date, note, nameA, nameB, 
+            pA: document.getElementById('pA').value, qA: document.getElementById('qA').value, unitA: selA.options[selA.selectedIndex].text,
+            pB: document.getElementById('pB').value, qB: document.getElementById('qB').value, unitB: selB.options[selB.selectedIndex].text,
+            kgA, kgB, win, winnerSide 
+        };
         
+        let list = JSON.parse(localStorage.getItem('shopRecords') || "[]");
+        list.unshift(record);
+        localStorage.setItem('shopRecords', JSON.stringify(list));
         document.getElementById('note').value = "";
         renderHistory();
     }
 
     function renderHistory() {
-        const list = JSON.parse(localStorage.getItem('shopRecords2025') || "[]");
+        const list = JSON.parse(localStorage.getItem('shopRecords') || "[]");
         const tbody = document.getElementById('historyBody');
         tbody.innerHTML = "";
 
         list.forEach(item => {
+            // 根據 winnerSide 套用不同的 CSS 類別
+            let winClass = "";
+            if (item.winnerSide === "A") winClass = "win-A";
+            else if (item.winnerSide === "B") winClass = "win-B";
+
             tbody.innerHTML += `
                 <tr>
                     <td><small>${item.date}</small><br><strong>${item.note}</strong></td>
-                    <td>
-                        <span style="color:var(--color-A)">${item.nameA}: $${item.kgA}/kg</span><br>
-                        <span style="color:var(--color-B)">${item.nameB}: $${item.kgB}/kg</span>
+                    <td class="hist-detail">
+                        <span style="color:var(--color-A); font-weight:bold;">${item.nameA}:</span> 
+                        ${item.qA}${item.unitA} ${item.pA}元 <strong>($${item.kgA}/kg)</strong><br>
+                        <span style="color:var(--color-B); font-weight:bold;">${item.nameB}:</span> 
+                        ${item.qB}${item.unitB} ${item.pB}元 <strong>($${item.kgB}/kg)</strong>
                     </td>
-                    <td><small>${item.win}</small></td>
+                    <td><span class="${winClass}">${item.win}</span></td>
                     <td><button class="btn-del" onclick="deleteItem(${item.id})">刪除</button></td>
                 </tr>`;
         });
     }
 
     function deleteItem(id) {
-        let list = JSON.parse(localStorage.getItem('shopRecords2025') || "[]");
+        let list = JSON.parse(localStorage.getItem('shopRecords') || "[]");
         list = list.filter(i => i.id !== id);
-        localStorage.setItem('shopRecords2025', JSON.stringify(list));
+        localStorage.setItem('shopRecords', JSON.stringify(list));
         renderHistory();
     }
 
-    update();
-    renderHistory();
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', update));
+    window.onload = () => { update(); renderHistory(); };
 </script>
 
 </body>
 </html>
-
